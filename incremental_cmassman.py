@@ -4,7 +4,7 @@ import random
 import matplotlib.pyplot as plt
 import sys  # Import sys to stop the program
 
-class Incremental2SAT:
+class IncrementalkSAT:
     def __init__(self, clauses):
         self.clauses = clauses
         self.num_vars = self.get_num_vars()
@@ -91,8 +91,8 @@ def parse_ksat_cnf(file_name):
 
 
 def time_solver(clauses):
-    """Time the 2-SAT solver on a given set of clauses."""
-    solver = Incremental2SAT(clauses)
+    """Time the k-SAT solver on a given set of clauses."""
+    solver = IncrementalkSAT(clauses)
 
     start_time = time.time()
     satisfiable = solver.incremental_search()
@@ -123,16 +123,19 @@ def run_ksat_cases(file_name, output_file):
             times.append(elapsed_time)
             answers.append(solver_result)
 
-            print(f"Vars: {num_vars}, Clauses: {len(clauses)}, Time: {elapsed_time:.6f} seconds, "
-                  f"Satisfiable (Solver): {solver_result}, Expected: {satisfiability}")
+            # Prepare output line
+            output_line = (f"Vars: {num_vars}, Clauses: {len(clauses)}, Time: {elapsed_time:.6f} seconds, "
+                           f"Satisfiable (Solver): {solver_result}, Expected: {satisfiability}")
+            print(output_line)
             
+            # Also write the same output to the file
+            csv_writer.writerow([num_vars, num_clauses, elapsed_time, solver_result, satisfiability])
+
             # Stop the program if the solver result does not match the expected satisfiability
             if (solver_result and satisfiability == 'U') or (not solver_result and satisfiability == 'S'):
-                print(f"Mismatch detected! Solver: {solver_result}, Expected: {satisfiability}")
+                error_message = (f"Mismatch detected! Solver: {solver_result}, Expected: {satisfiability}")
+                print(error_message)
                 sys.exit("Stopping the program due to mismatched results.")
-
-            # Write to the results file
-            csv_writer.writerow([num_vars, num_clauses, elapsed_time, solver_result, satisfiability])
 
     return sizes, times, answers
 
@@ -170,3 +173,4 @@ if __name__ == "__main__":
     # Run the cases using the file parsed from the CNF file and save results to a CSV file
     sizes, times, answers = run_ksat_cases(TestFile, OutputFile)
     plot_results(sizes, times, answers)
+
